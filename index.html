@@ -22,26 +22,36 @@
       align-items: center;
       padding: 20px;
     }
-    /* Родительский контейнер, который можно растягивать в Notion */
+
+    /* 
+      Обёртка, которую вы будете растягивать в Notion. 
+      Зададим max-width, чтобы не росло бесконечно,
+      и width: 100%, чтобы растягивалось на всю доступную ширину.
+    */
     .clock-container {
       width: 100%;
-      max-width: 800px; /* можно задать максимальную ширину */
+      max-width: 600px;  /* при желании можно изменить */
       display: flex;
-      gap: 5px; /* зазор между плашками */
+      gap: 5px;          /* зазор между карточками */
     }
-    /* Карточка с сохранением пропорций */
+
+    /* 
+      Каждая карточка «тянется» равномерно (flex: 1) 
+      и сохраняет исходное соотношение 150/220. 
+    */
     .flip-card {
       flex: 1;
-      aspect-ratio: 150 / 220; /* сохраняем соотношение, как в оригинале */
-      background-color: #640505;
+      aspect-ratio: 150 / 220; /* сохраняем пропорции */
+      background-color: #640505; /* Бордовый */
       color: #ffffff;
       position: relative;
       perspective: 1000px;
       border-radius: 16px;
       overflow: hidden;
-      /* адаптивный размер шрифта, который изменяется при масштабировании */
-      font-size: calc(10px + 4vw);
+      /* Чтобы все надписи внутри не наследовали слишком большой font-size */
+      font-size: 14px;
     }
+
     .flip-inner {
       position: relative;
       width: 100%;
@@ -49,7 +59,12 @@
       transform-style: preserve-3d;
       transition: transform 0.7s ease;
     }
-    /* Лицевая и оборотная стороны (цифры) */
+
+    /* 
+      Цифры. Используем clamp(), чтобы не становились слишком большими или слишком маленькими.
+      При узком контейнере (мобильный) шрифт будет ближе к 60px,
+      при широком контейнере – до 110px (как в оригинале).
+    */
     .flip-face {
       position: absolute;
       width: 100%;
@@ -58,17 +73,22 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      font-size: clamp(60px, 8vw, 110px);
       line-height: 1;
     }
-    .flip-front { }
+    .flip-front {}
     .flip-back {
       transform: rotateX(180deg);
     }
-    /* Подписи даты и дня недели */
+
+    /* 
+      Подписи даты и дня недели.
+      Тоже используем clamp(), чтобы надписи не расползались.
+    */
     .date-label,
     .weekday-label {
       position: absolute;
-      font-size: 1.5em;
+      font-size: clamp(12px, 2vw, 20px);
       text-transform: uppercase;
       opacity: 0.9;
     }
@@ -80,6 +100,7 @@
       bottom: 10px;
       right: 10px;
     }
+
     /* Флип-анимация */
     .flip-card.flip .flip-inner {
       transform: rotateX(-180deg);
