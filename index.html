@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Responsive Flip Clock</title>
+  <meta charset="UTF-8" />
+  <title>Flip Clock (Scaled)</title>
   <!-- Подключаем Anton из Google Fonts -->
   <link
     href="https://fonts.googleapis.com/css2?family=Anton&display=swap"
@@ -19,39 +19,47 @@
       background: transparent;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start; /* чтобы часы располагались сверху по желанию */
       padding: 20px;
     }
 
     /* 
-      Обёртка, которую вы будете растягивать в Notion. 
-      Зададим max-width, чтобы не росло бесконечно,
-      и width: 100%, чтобы растягивалось на всю доступную ширину.
+      Ширина этой обёртки .scalable-wrapper и будет управлять размером часов.
+      Можно поставить max-width: 600px, 800px, 100% — как нужно.
     */
-    .clock-container {
+    .scalable-wrapper {
       width: 100%;
-      max-width: 600px;  /* при желании можно изменить */
-      display: flex;
-      gap: 5px;          /* зазор между карточками */
+      max-width: 600px; /* или уберите, чтобы растягивалось ещё больше */
+      position: relative;
+      /* высота изначально 0, скрипт сам её проставит, 
+         исходя из соотношения 150×220 и выбранного scale */
     }
 
     /* 
-      Каждая карточка «тянется» равномерно (flex: 1) 
-      и сохраняет исходное соотношение 150/220. 
+      Это ваши "идеальные" часы. 
+      ВАЖНО: ширина и высота — фиксированные 150px и 220px,
+      как у вас было в оригинале, и font-size: 110px и т.д.
     */
+    .clock-container {
+      width: 150px;
+      height: 220px;
+      position: absolute; /* чтобы удобно было масштабировать через transform */
+      top: 0;
+      left: 0;
+      transform-origin: top left; /* масштабируем из левого верхнего угла */
+      background: transparent; /* сам фон задан внутри flip-card */
+    }
+
     .flip-card {
-      flex: 1;
-      aspect-ratio: 150 / 220; /* сохраняем пропорции */
+      position: relative;
+      width: 150px;
+      height: 220px;
       background-color: #640505; /* Бордовый */
       color: #ffffff;
-      position: relative;
       perspective: 1000px;
       border-radius: 16px;
       overflow: hidden;
-      /* Чтобы все надписи внутри не наследовали слишком большой font-size */
-      font-size: 14px;
     }
-
     .flip-inner {
       position: relative;
       width: 100%;
@@ -59,12 +67,6 @@
       transform-style: preserve-3d;
       transition: transform 0.7s ease;
     }
-
-    /* 
-      Цифры. Используем clamp(), чтобы не становились слишком большими или слишком маленькими.
-      При узком контейнере (мобильный) шрифт будет ближе к 60px,
-      при широком контейнере – до 110px (как в оригинале).
-    */
     .flip-face {
       position: absolute;
       width: 100%;
@@ -73,22 +75,19 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: clamp(60px, 8vw, 110px);
+      /* Немного уменьшаем размер, с 120px до 110px */
+      font-size: 110px;
       line-height: 1;
     }
-    .flip-front {}
+    .flip-front { }
     .flip-back {
       transform: rotateX(180deg);
     }
 
-    /* 
-      Подписи даты и дня недели.
-      Тоже используем clamp(), чтобы надписи не расползались.
-    */
     .date-label,
     .weekday-label {
       position: absolute;
-      font-size: clamp(12px, 2vw, 20px);
+      font-size: 20px;
       text-transform: uppercase;
       opacity: 0.9;
     }
@@ -101,31 +100,34 @@
       right: 10px;
     }
 
-    /* Флип-анимация */
     .flip-card.flip .flip-inner {
       transform: rotateX(-180deg);
     }
   </style>
 </head>
 <body>
-  <div class="clock-container">
-    <!-- Левая карточка (ЧАСЫ) -->
-    <div class="flip-card" id="hour-card">
-      <div class="flip-inner" id="hour-inner">
-        <div class="flip-face flip-front" id="hour-front">00</div>
-        <div class="flip-face flip-back"  id="hour-back">00</div>
+  <!-- Внешняя обёртка, которая будет растягиваться -->
+  <div class="scalable-wrapper" id="scalableWrapper">
+    
+    <!-- Исходный блок с часами (ничего не меняем) -->
+    <div class="clock-container" id="clockContainer">
+      <div class="flip-card" id="hour-card">
+        <div class="flip-inner" id="hour-inner">
+          <div class="flip-face flip-front" id="hour-front">00</div>
+          <div class="flip-face flip-back"  id="hour-back">00</div>
+        </div>
+        <div class="date-label" id="date-label">22 FEB</div>
       </div>
-      <div class="date-label" id="date-label">22 FEB</div>
+      
+      <div class="flip-card" id="minute-card" style="margin-left: 5px;">
+        <div class="flip-inner" id="minute-inner">
+          <div class="flip-face flip-front" id="minute-front">00</div>
+          <div class="flip-face flip-back"  id="minute-back">00</div>
+        </div>
+        <div class="weekday-label" id="weekday-label">WEDNESDAY</div>
+      </div>
     </div>
 
-    <!-- Правая карточка (МИНУТЫ) -->
-    <div class="flip-card" id="minute-card">
-      <div class="flip-inner" id="minute-inner">
-        <div class="flip-face flip-front" id="minute-front">00</div>
-        <div class="flip-face flip-back"  id="minute-back">00</div>
-      </div>
-      <div class="weekday-label" id="weekday-label">WEDNESDAY</div>
-    </div>
   </div>
 
   <script>
@@ -148,6 +150,7 @@
     let currentHour   = null;
     let currentMinute = null;
 
+    // -- Функция обновления часов --
     function updateClock() {
       const now = new Date();
       const hour    = now.getHours();
@@ -188,7 +191,36 @@
       }, 700);
     }
 
-    updateClock();
+    // -- Масштабирование --
+    function scaleClock() {
+      const wrapper = document.getElementById('scalableWrapper');
+      const clock   = document.getElementById('clockContainer');
+      
+      // Исходные размеры нашей "коробки" — 150×220
+      const baseWidth  = 150;
+      const baseHeight = 220;
+
+      // Текущая доступная ширина wrapper'а
+      const wrapperWidth = wrapper.offsetWidth;
+      
+      // Во сколько раз увеличиваем (или уменьшаем)
+      const scaleFactor = wrapperWidth / baseWidth;
+
+      // Применяем transform: scale(...) к clockContainer
+      clock.style.transform = `scale(${scaleFactor})`;
+
+      // Чтобы обёртка занимала нужную высоту (220 * scaleFactor), иначе там будет 0
+      wrapper.style.height = (baseHeight * scaleFactor) + 'px';
+    }
+
+    // -- События для масштабирования при загрузке и изменении размеров окна --
+    window.addEventListener('load', () => {
+      updateClock();
+      scaleClock();
+    });
+    window.addEventListener('resize', scaleClock);
+
+    // Обновляем время каждую секунду
     setInterval(updateClock, 1000);
   </script>
 </body>
